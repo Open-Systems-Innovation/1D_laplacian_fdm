@@ -1,0 +1,4 @@
+#+TITLE:Solution to a 1D Laplacian equation using FDM
+This repository proves a 1D solution to the Laplacian equation using PETSc. It also supplies a build in Nix development environment using the ~flake.nix~ file.
+
+The main purpose of this repository is to provide a simple learning example for interfacing with the C bindings in the ~PETSc~ library.

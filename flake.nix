@@ -21,8 +21,9 @@
             packages = [
             # General packages
               # pkgs.hello-nix
-              # pkgs.petsc
-              # pkgs.mpich
+              pkgs.petsc
+              pkgs.mpich
+              pkgs.bear
               #  # Python packages
               #(pkgs.python3.withPackages (python-pkgs: [
               #  # packages for formatting/ IDE
@@ -37,7 +38,7 @@
               #]))
             ];
 
-            # PETSC_DIR = "${pkgs.petsc}";
+            PETSC_DIR = "${pkgs.petsc}";
 
             shellHook = ''
               export ENVIRONMENT_NAME="Custom Environment"

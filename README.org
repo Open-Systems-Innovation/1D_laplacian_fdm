@@ -2,6 +2,20 @@
 This repository proves a 1D solution to the Laplacian equation using PETSc. It also supplies a build in Nix development environment using the ~flake.nix~ file.
 
 The main purpose of this repository is to provide a simple learning example for interfacing with the C bindings in the ~PETSc~ library.
+* How to Compile the simulation
+Included in this directory is a makefile. This make file is about as simple as possible for a PETSc document and is reproduced in its entirety below:
+#+BEGIN_SRC make
+include ${PETSC_DIR}/lib/petsc/conf/variables
+include ${PETSC_DIR}/lib/petsc/conf/rules
+#+END_SRC
+This uses the users installation of ~PETSC_DIR~ to include some standard variables and build targets for a PETSC application. Alternatively we could specify each included library in our makefile.
+
+To compile all we need to do is:
+#+BEGIN_SRC bash
+make main
+#+END_SRC
+Which will compile the ~main.c~ file and link the appropriate PETSc libraries
+
 * How to run the simulation
 This is a uniprocessor example. In general we could run a ~PETSc~ progam as follows:
 #+BEGIN_SRC bash
@@ -11,3 +25,9 @@ Therefore, the simplest way of running the ~main.c~ file in this repository is:
 #+BEGIN_SRC bash
 mpiexec -n 1 ./main
 #+END_SRC
+
+In this example, on line 35 we have checked if the user has provided the value of ~n~ where ~n~ is the dimension of the problem. That means we can supply this value at runtime as follows:
+#+BEGIN_SRC bash
+mpiexec -n 1 ./main -n 100
+#+END_SRC
+This will override the default value of ~n = 10~ and run the simulation with ~n = 100~ 

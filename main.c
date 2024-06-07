@@ -1,3 +1,4 @@
+#include "petscsys.h"
 static char help[] = "Solves a tridiagonal linear system with KSP.\n\n";
 
 /*
@@ -28,6 +29,9 @@ int main(int argc, char **args)
   PetscCallMPI(MPI_Comm_size(PETSC_COMM_WORLD, &size));
   PetscCheck(size == 1, PETSC_COMM_WORLD, PETSC_ERR_WRONG_MPI_SIZE, "This is a uniprocessor example only!");
 
+  /* The following checks whether the user has provided a command line option to
+     set the value of n where n is the problem dimension. If so, n is set 
+  */
   PetscCall(PetscOptionsGetInt(NULL, NULL, "-n", &n, NULL));
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -39,7 +43,7 @@ int main(int argc, char **args)
      Create vectors.  Note that we form 1 vector from scratch and
      then duplicate as needed.
   */
-  PetscCall(VecCreate(PETSC_COMM_SELF, &x));
+  PetscCall(VecCreate(PETSC_COMM_SELF, &x)); // PETSC_COMM_SELF is MPI_COMM_SELF
   PetscCall(PetscObjectSetName((PetscObject)x, "Solution"));
   PetscCall(VecSetSizes(x, PETSC_DECIDE, n));
   PetscCall(VecSetFromOptions(x));
@@ -171,3 +175,54 @@ int main(int argc, char **args)
   PetscCall(PetscFinalize());
   return 0;
 }
+
+/*TEST
+
+   test:
+      args: -ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always
+
+   test:
+      suffix: 2
+      args: -pc_type sor -pc_sor_symmetric -ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always
+
+   test:
+      suffix: 2_aijcusparse
+      requires: cuda
+      args: -pc_type sor -pc_sor_symmetric -ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always -mat_type aijcusparse -vec_type cuda
+      args: -ksp_view
+
+   test:
+      suffix: 3
+      args: -pc_type eisenstat -ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always
+
+   test:
+      suffix: 3_aijcusparse
+      requires: cuda
+      args: -pc_type eisenstat -ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always -mat_type aijcusparse -vec_type cuda -ksp_view
+
+   test:
+      suffix: aijcusparse
+      requires: cuda
+      args: -ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always -mat_type aijcusparse -vec_type cuda -ksp_view
+      output_file: output/ex1_1_aijcusparse.out
+
+   test:
+      requires: defined(PETSC_USE_SINGLE_LIBRARY)
+      suffix: mpi_linear_solver_server_1
+      nsize: 3
+      filter: sed 's?ATOL?RTOL?g' | grep -v HERMITIAN
+      # use the MPI Linear Solver Server
+      args: -mpi_linear_solver_server -mpi_linear_solver_server_view
+      # controls for the use of PCMPI on a particular system
+      args: -mpi_linear_solver_server_minimum_count_per_rank 5 -mpi_linear_solver_server_ksp_view -mpi_linear_solver_server_mat_view
+      # the usual options for the linear solver (in this case using the server)
+      args: -ksp_monitor -ksp_converged_reason -mat_view -ksp_view -ksp_type cg -pc_type none
+      # the options for the prefixed objects
+      args: -prefix_test_mpi_linear_solver_server_mat_view -prefix_test_ksp_monitor -prefix_test_mpi_linear_solver_server_minimum_count_per_rank 5
+
+   test:
+      requires: !__float128
+      suffix: minit
+      args: -ksp_monitor -pc_type none -ksp_min_it 8
+
+TEST*/

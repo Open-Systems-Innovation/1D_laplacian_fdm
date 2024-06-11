@@ -1,4 +1,5 @@
 #include "petscsys.h"
+#include <petscviewer.h>
 static char help[] = "Solves a tridiagonal linear system with KSP.\n\n";
 
 /*
@@ -132,6 +133,17 @@ int main(int argc, char **args)
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   PetscCall(KSPSolve(ksp, b, x));
 
+  /* Output solution to VTK file */
+  PetscViewer viewer;
+  PetscPrintf(PETSC_COMM_SELF, "Opening VTK viewer...\n");
+  PetscCall(PetscViewerVTKOpen(PETSC_COMM_SELF, "solution.vtk", FILE_MODE_WRITE, &viewer));
+  PetscPrintf(PETSC_COMM_SELF, "VTK viewer opened.\n");
+
+  PetscPrintf(PETSC_COMM_SELF, "Writing vector to VTK file...\n");
+  PetscCall(VecView(x, viewer));
+  PetscPrintf(PETSC_COMM_SELF, "Vector written to VTK file.\n");
+
+  PetscCall(PetscViewerDestroy(&viewer));
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                       Check the solution and clean up
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

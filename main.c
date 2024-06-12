@@ -1,5 +1,6 @@
 #include "petscsys.h"
-#include <petscviewer.h>
+#include "petscviewer.h"
+#include <stdio.h>
 static char help[] = "Solves a tridiagonal linear system with KSP.\n\n";
 
 /*
@@ -25,12 +26,15 @@ int main(int argc, char **args)
   PetscMPIInt size;
   PetscScalar value[3];
 
+  printf("hello");
+
   PetscFunctionBeginUser;
   PetscCall(PetscInitialize(&argc, &args, (char *)0, help));
   PetscCallMPI(MPI_Comm_size(PETSC_COMM_WORLD, &size));
   PetscCheck(size == 1, PETSC_COMM_WORLD, PETSC_ERR_WRONG_MPI_SIZE, "This is a uniprocessor example only!");
 
-  /* The following checks whether the user has provided a command line option to
+  /*
+    The following checks whether the user has provided a command line option to
      set the value of n where n is the problem dimension. If so, n is set 
   */
   PetscCall(PetscOptionsGetInt(NULL, NULL, "-n", &n, NULL));
@@ -39,7 +43,6 @@ int main(int argc, char **args)
          Compute the matrix and right-hand-side vector that define
          the linear system, Ax = b.
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
   /*
      Create vectors.  Note that we form 1 vector from scratch and
      then duplicate as needed.
@@ -52,7 +55,7 @@ int main(int argc, char **args)
   PetscCall(VecDuplicate(x, &u));
 
   /*
-     Create matrix.  When using MatCreate(), the matrix format can
+     Create the A matrix.  When using MatCreate(), the matrix format can
      be specified at runtime.
 
      Performance tuning note:  For problems of substantial size,
@@ -65,7 +68,8 @@ int main(int argc, char **args)
   PetscCall(MatSetUp(A));
 
   /*
-     Assemble matrix
+    Assemble the A matrix. A is a tridiagonal matrix meaning it only has
+    non zero entries on the main diagonal, subdiagonal, and superdiagonal
   */
   value[0] = -1.0;
   value[1] = 2.0;
@@ -133,17 +137,9 @@ int main(int argc, char **args)
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   PetscCall(KSPSolve(ksp, b, x));
 
-  /* Output solution to VTK file */
-  PetscViewer viewer;
-  PetscPrintf(PETSC_COMM_SELF, "Opening VTK viewer...\n");
-  PetscCall(PetscViewerVTKOpen(PETSC_COMM_SELF, "solution.vtk", FILE_MODE_WRITE, &viewer));
-  PetscPrintf(PETSC_COMM_SELF, "VTK viewer opened.\n");
-
-  PetscPrintf(PETSC_COMM_SELF, "Writing vector to VTK file...\n");
-  PetscCall(VecView(x, viewer));
-  PetscPrintf(PETSC_COMM_SELF, "Vector written to VTK file.\n");
-
-  PetscCall(PetscViewerDestroy(&viewer));
+  // View the solution vector
+  PetscCall(VecView(b, PETSC_VIEWER_STDOUT_SELF));
+  
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                       Check the solution and clean up
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

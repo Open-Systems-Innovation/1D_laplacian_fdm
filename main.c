@@ -137,7 +137,7 @@ int main(int argc, char **args)
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   PetscCall(KSPSolve(ksp, b, x));
 
-  // View the solution vector
+  // View the solution vector b
   PetscCall(VecView(b, PETSC_VIEWER_STDOUT_SELF));
   
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

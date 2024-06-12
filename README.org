@@ -33,4 +33,4 @@ mpiexec -n 1 ./main -n 100
 This will override the default value of ~n = 10~ and run the simulation with ~n = 100~ 
 
 * Visualizing the solution
-To visualize the solution we can use the ~PETSc~ capability to output the solution vector to a ~VTK~ file.
+Generally, in scientific simulations like this, we can visualize the solution using a visualization software like Paraview. In this case, sicne we have a simple 1D example, it doesn't make much sense to use Paraview in this case. Instead we can print out the vector using a function from ~PETSc~ called ~VecView()~, or we can plot the result using ~Matplotlib~ from python.

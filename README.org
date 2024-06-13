@@ -50,7 +50,7 @@ PetscCall(MatView(A, PETSC_VIEWER_STDOUT_SELF));
 
 This gives the following result (when written in LaTeX):
 
-\begin{equation*}
+$$
 A = \begin{pmatrix}
 2 & -1 & 0 & 0 & \cdots & 0 \\
 -1 & 2 & -1 & 0 & \cdots & 0 \\
@@ -59,16 +59,16 @@ A = \begin{pmatrix}
 \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
 0 & 0 & 0 & 0 & \cdots & 2
 \end{pmatrix}
-\end{equation*}
+$$
 
 * What this program shows
 This program essentially solves a linear system of equation, ~Ax = b~ where ~A~ is the tridiagonal matrix shown above. We can think of this matrix as the discrete Laplacian operator in one dimension. This is used to approximate the second derivative in differential equations.
 
 When using a finite difference discretization, the second derivative at a point $x_i$ can be approximated by: 
 
-\begin{equation*}
+$$
 \frac{d^2 u}{dx^2} \approx \frac{u_{i-1} - 2u_i + u_{i+1}}{h^2}
-\end{equation*}
+$$
 
 If we let $h=1$ then each row of $Au$ corresponds to the finite difference equation for a point in the domain.
 

@@ -1,6 +1,4 @@
 #include "petscsys.h"
-#include "petscviewer.h"
-#include <stdio.h>
 static char help[] = "Solves a tridiagonal linear system with KSP.\n\n";
 
 /*
@@ -15,8 +13,11 @@ static char help[] = "Solves a tridiagonal linear system with KSP.\n\n";
 */
 #include <petscksp.h>
 
-int main(int argc, char **args)
-{
+int main(int argc, char **args) {
+  /*
+    Declare the variables for vectors, matrices, linear solvers,
+    preconditions, etc.
+   */
   Vec         x, b, u; /* approx solution, RHS, exact solution */
   Mat         A;       /* linear system matrix */
   KSP         ksp;     /* linear solver context */
@@ -26,11 +27,16 @@ int main(int argc, char **args)
   PetscMPIInt size;
   PetscScalar value[3];
 
-  printf("hello");
-
+  /*
+    Initialize PETSc and MPI with process size of 1
+   */
   PetscFunctionBeginUser;
   PetscCall(PetscInitialize(&argc, &args, (char *)0, help));
   PetscCallMPI(MPI_Comm_size(PETSC_COMM_WORLD, &size));
+
+  /*
+    Check if the program is running in a single processor environment
+   */
   PetscCheck(size == 1, PETSC_COMM_WORLD, PETSC_ERR_WRONG_MPI_SIZE, "This is a uniprocessor example only!");
 
   /*
@@ -44,23 +50,25 @@ int main(int argc, char **args)
          the linear system, Ax = b.
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   /*
-     Create vectors.  Note that we form 1 vector from scratch and
-     then duplicate as needed.
+    Create vectors x, b, and u. Note that we form 1 vector from scratch and then duplicate as needed.
+    x: solution vector
+    b: right-hand side (RHS) of linear system
+    u: exact solution for error checking
   */
   PetscCall(VecCreate(PETSC_COMM_SELF, &x)); // PETSC_COMM_SELF is MPI_COMM_SELF
-  PetscCall(PetscObjectSetName((PetscObject)x, "Solution"));
+  PetscCall(PetscObjectSetName((PetscObject)x, "Solution")); // TODO
   PetscCall(VecSetSizes(x, PETSC_DECIDE, n));
   PetscCall(VecSetFromOptions(x));
   PetscCall(VecDuplicate(x, &b));
   PetscCall(VecDuplicate(x, &u));
 
   /*
-     Create the A matrix.  When using MatCreate(), the matrix format can
-     be specified at runtime.
+    Create the A matrix.  When using MatCreate(), the matrix
+    format can be specified at runtime.
 
-     Performance tuning note:  For problems of substantial size,
-     preallocation of matrix memory is crucial for attaining good
-     performance. See the matrix chapter of the users manual for details.
+    Performance tuning note:  For problems of substantial size,
+    preallocation of matrix memory is crucial for attaining good
+    performance. See the matrix chapter of the users manual for details.
   */
   PetscCall(MatCreate(PETSC_COMM_SELF, &A));
   PetscCall(MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, n, n));
@@ -68,8 +76,7 @@ int main(int argc, char **args)
   PetscCall(MatSetUp(A));
 
   /*
-    Assemble the A matrix. A is a tridiagonal matrix meaning it only has
-    non zero entries on the main diagonal, subdiagonal, and superdiagonal
+    Assemble the A matrix. First, set all the values. A is a tridiagonal matrix meaning it only has non zero entries on the main diagonal, subdiagonal, and superdiagonal
   */
   value[0] = -1.0;
   value[1] = 2.0;
@@ -93,8 +100,12 @@ int main(int argc, char **args)
   PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
   PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
 
+  // Print the matrix A
+  PetscCall(MatView(A, PETSC_VIEWER_STDOUT_SELF));
+
   /*
-     Set exact solution; then compute right-hand-side vector.
+    Set exact solution, u, then compute right-hand-side vector.
+    This will be used when calculating the error of our solver
   */
   PetscCall(VecSet(u, 1.0));
   PetscCall(MatMult(A, u, b));
@@ -118,6 +129,8 @@ int main(int argc, char **args)
      - The following four statements are optional; all of these
        parameters could alternatively be specified at runtime via
        KSPSetFromOptions();
+     - Here we set the preconditioner to use the Jacobi method if
+       nothing is specified at runtime
   */
   PetscCall(KSPGetPC(ksp, &pc));
   PetscCall(PCSetType(pc, PCJACOBI));
@@ -137,8 +150,8 @@ int main(int argc, char **args)
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   PetscCall(KSPSolve(ksp, b, x));
 
-  // View the solution vector b
-  PetscCall(VecView(b, PETSC_VIEWER_STDOUT_SELF));
+  // View the solution vector x
+  PetscCall(VecView(x, PETSC_VIEWER_STDOUT_SELF));
   
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                       Check the solution and clean up
@@ -158,7 +171,9 @@ int main(int argc, char **args)
   */
   PetscCall(KSPDestroy(&ksp));
 
-  /* test if prefixes properly propagate to PCMPI objects */
+  /* test if prefixes properly propagate to PCMPI objects
+     This is not something one would do in production code
+     Its only for testing and debugging.*/
   if (PCMPIServerActive) {
     PetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
     PetscCall(KSPSetOptionsPrefix(ksp, "prefix_test_"));

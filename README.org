@@ -53,7 +53,7 @@ This gives the following result (when written in LaTeX):
 $$
 A =
 \begin{bmatrix}
-2 & -1 & 0 & 0 & \cdots & 0 \\
+2 & -1 & 0 & 0 & \cdots & 0 \\\
 -1 & 2 & -1 & 0 & \cdots & 0 \\
 0 & -1 & 2 & -1 & \cdots & 0 \\
 0 & 0 & -1 & 2 & \cdots & 0 \\
@@ -68,7 +68,7 @@ This program essentially solves a linear system of equation, ~Ax = b~ where ~A~ 
 When using a finite difference discretization, the second derivative at a point $x_i$ can be approximated by: 
 
 $$
-\frac{d^2 u}{dx^2} \approx \frac{u_{i-1} - 2u_i + u_{i+1}}{h^2}
+\frac{d^2 u}{dx^2} \approx \frac{u _{i-1} - 2u_i + u _{i+1}}{h^2}
 $$
 
 If we let $h=1$ then each row of $Au$ corresponds to the finite difference equation for a point in the domain.

@@ -51,14 +51,14 @@ PetscCall(MatView(A, PETSC_VIEWER_STDOUT_SELF));
 This gives the following result (when written in LaTeX):
 
 $$
-A = \begin{pmatrix}
+A = \begin{matrix}
 2 & -1 & 0 & 0 & \cdots & 0 \\
 -1 & 2 & -1 & 0 & \cdots & 0 \\
 0 & -1 & 2 & -1 & \cdots & 0 \\
 0 & 0 & -1 & 2 & \cdots & 0 \\
 \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
 0 & 0 & 0 & 0 & \cdots & 2
-\end{pmatrix}
+\end{matrix}
 $$
 
 * What this program shows
